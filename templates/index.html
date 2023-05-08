@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raspberry Pi - My Pet Monitor</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .container {
+            display: flex;
+        }
+        #statistics {
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Pet Monitor</h1>
+    <div class="container">
+        <div id="statistics">
+            <h3>Statistics</h3>
+            <ul>
+                <li id="stat1">Number of drinks: 0</li>
+                <li id="stat2">Number of eats: 0</li>
+            </ul>
+        </div>
+        <a href="/video_feed" target="_blank" rel="noopener noreferrer">
+            <img src="/video_feed" alt="Video Feed">
+        </a>
+        <div>
+            <h2>Ask ChatGPT</h2>
+            <input type="text" id="question" placeholder="Question here">
+            <button onclick="askQuestion()">Ask</button>
+            <textarea id="gpt-response" readonly rows="5" cols="50"></textarea>
+        </div>
+        <div>
+            <h2>Activate Cat Teasing</h2>
+            <button onclick="controlTeasing(1)">Start</button>
+            <button onclick="controlTeasing(0)">Stop</button>
+        </div>
+    </div>
+    <script>
+        function controlTeasing(value) {
+            $.post("/control_teasing", { value: value }, function(data) {
+                console.log("Value sent: " + data.value);
+            });
+        }
+        function askQuestion() {
+            var question = document.getElementById("question").value;
+            $.post("/ask", { question: question }, function(data) {
+                document.getElementById("gpt-response").value = data.response;
+            });
+        }
+        function updateStatistics() {
+            $.getJSON("/get_statistics", function(data) {
+                document.getElementById("stat1").innerText = "Number of drinks: " + data.stat1;
+                document.getElementById("stat2").innerText = "Number of eats: " + data.stat2;
+            });
+        }
+
+        // Update the statistics every 5 seconds
+        setInterval(updateStatistics, 5000);
+
+        // Fetch the initial statistics
+        updateStatistics();
+    </script>
+</body>
+</html>
+
